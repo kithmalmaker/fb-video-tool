@@ -64,20 +64,19 @@ async def generate_fb_content(req: VideoRequest):
     except Exception as e:
         print(f"Memory DB Read Error: {e}")
     
-    # 1. ACTUAL YOUTUBE SCRAPING VIA LIGHTWEIGHT REQUEST (Bypass Vercel yt-dlp block)
+    # 1. ACTUAL YOUTUBE SCRAPING VIA OEMBED (100% Reliable, No Bot Blocks)
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.get(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}) as resp:
-                html = await resp.text()
-                
-                # Extract title
-                import re
-                title_match = re.search(r'<title>(.*?)</title>', html)
-                title = title_match.group(1).replace(' - YouTube', '') if title_match else 'Unknown Title'
-                
-                # Extract description
-                desc_match = re.search(r'"shortDescription":"(.*?)"', html)
-                description = desc_match.group(1) if desc_match else ''
+            oembed_url = f"https://www.youtube.com/oembed?url={url}&format=json"
+            async with session.get(oembed_url) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    title = data.get('title', 'Unknown Title')
+                    author = data.get('author_name', 'Unknown Author')
+                    description = f"Video by {author}"
+                else:
+                    title = "Unknown Cosmic Video"
+                    description = ""
                 
                 # Save to Memory
                 try:

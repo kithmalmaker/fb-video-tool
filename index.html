@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cosmic Secrets | Elite FB Content Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- GSAP Engine -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/CustomEase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Inter:wght@300;400;600&display=swap');
+    
+    /* PILLAR III: DIMENSIONAL ARCHITECTURE - Volumetric Glassmorphism */
+    :root {
+      --bg-color: #050505; /* Dark Mode Depth: not pure black */
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.15);
+      --premium-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+      --accent: #5e6ad2;
+      --text-main: #f0f0f0;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 4rem 2rem;
+      background-image: radial-gradient(circle at 50% 0%, rgba(94, 106, 210, 0.15) 0%, #050505 60%);
+    }
+
+    /* Fluid Topographic Scales */
+    h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2.5rem, 5vw, 5rem);
+      letter-spacing: -0.03em;
+      text-align: center;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #ffffff 0%, #a0a5d0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      opacity: 0;
+      transform: translateY(30px);
+      will-change: transform, opacity;
+    }
+
+    p.subtitle {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(0.9rem, 1.5vw, 1.2rem);
+      letter-spacing: 0.15em;
+      color: #888;
+      margin-bottom: 4rem;
+      text-align: center;
+      opacity: 0;
+    }
+
+    /* Glass Surface Implementation */
+    .glass-surface {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px) saturate(150%);
+      -webkit-backdrop-filter: blur(20px) saturate(150%);
+      border: 1px solid transparent;
+      border-top-color: var(--glass-border);
+      border-left-color: rgba(255,255,255,0.05);
+      box-shadow: var(--premium-shadow);
+      border-radius: 24px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 800px;
+      opacity: 0;
+      transform: translateY(40px);
+      will-change: transform, opacity;
+    }
+
+    .input-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    input[type="url"] {
+      flex: 1;
+      min-width: 250px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 1.2rem;
+      border-radius: 12px;
+      color: white;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.1rem;
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    input[type="url"]:focus {
+      border-color: var(--accent);
+    }
+
+    /* Magnetic Button Classes */
+    .magnetic-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 1.2rem 2.5rem;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      cursor: pointer;
+      font-family: 'Space Grotesk', sans-serif;
+      position: relative;
+      overflow: hidden;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      will-change: transform;
+      box-shadow: 0 4px 15px rgba(94, 106, 210, 0.4);
+    }
+
+    .magnetic-btn span {
+      pointer-events: none;
+      display: block;
+      will-change: transform;
+    }
+
+    .results {
+      display: none;
+      flex-direction: column;
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .result-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 1.5rem;
+      opacity: 0;
+      transform: translateY(20px);
+      will-change: transform, opacity;
+    }
+
+    .result-card h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.1rem;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      letter-spacing: 0.05em;
+    }
+
+    .result-content {
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #ddd;
+      white-space: pre-wrap;
+    }
+
+    /* The "Wait" Illusion Loader */
+    .loader {
+      display: none;
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      margin: 3rem auto;
+      animation: spin 1s cubic-bezier(0.8, 0, 0.1, 1) infinite;
+    }
+
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+  </style>
+</head>
+<body>
+
+  <h1 class="reveal-text">COSMIC SECRETS</h1>
+  <p class="subtitle reveal-text">FACEBOOK AUTOMATION & GROWTH ENGINE</p>
+
+  <div class="glass-surface hero-panel">
+    <div class="input-group">
+      <input type="url" id="yt-link" placeholder="Paste YouTube Video URL here..." autocomplete="off">
+      <button class="magnetic-btn" id="generate-btn">
+        <span>GENERATE</span>
+      </button>
+    </div>
+    
+    <div class="loader" id="loader"></div>
+
+    <div class="results" id="results">
+      <div class="result-card">
+        <h3>1. OPTIMIZED TITLES (FB ALGORITHM: MEANINGFUL INTERACTIONS)</h3>
+        <div class="result-content" id="res-titles"></div>
+      </div>
+      <div class="result-card">
+        <h3>2. FB DESCRIPTION (COMPLIANT WITH AI POLICIES)</h3>
+        <div class="result-content" id="res-desc"></div>
+      </div>
+      <div class="result-card">
+        <h3>3. USA TARGETED HASHTAGS</h3>
+        <div class="result-content" id="res-tags"></div>
+      </div>
+      <div class="result-card">
+        <h3>4. STRATEGIC LOCATION TAGGING</h3>
+        <div class="result-content" id="res-loc"></div>
+      </div>
+      <div class="result-card">
+        <h3>5. HIGH-END THUMBNAIL PROMPT</h3>
+        <div class="result-content" id="res-prompt"></div>
+      </div>
+      <div class="result-card">
+        <h3>6. OPTIMAL UPLOAD SCHEDULE (FB ALGORITHM)</h3>
+        <p class="result-content" style="margin-bottom: 1rem; font-size: 0.9rem;">
+           Based on the skill file: Spread out 3 Shorts to build audience velocity, and drop 1 Long Form (6-7 min) video at Prime Time to convert that traffic.
+        </p>
+        <canvas id="scheduleChart" width="400" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize GSAP & Physics
+    gsap.registerPlugin(CustomEase);
+    
+    // The Elite Snap (from OMNIVERSAL SKILLS file)
+    CustomEase.create("elite", "M0,0 C0.8,0 0.1,1 1,1");
+
+    // Initial 60FPS Hardware-Accelerated Reveal
+    const tl = gsap.timeline();
+    tl.to(".reveal-text", { y: 0, opacity: 1, duration: 1.2, stagger: 0.1, ease: "elite" })
+      .to(".hero-panel", { y: 0, opacity: 1, duration: 1, ease: "elite" }, "-=0.8");
+
+    // Magnetic Hover Physics Logic
+    const btn = document.querySelector('.magnetic-btn');
+    const btnText = btn.querySelector('span');
+    
+    btn.addEventListener('mousemove', (e) => {
+      const rect = btn.getBoundingClientRect();
+      const x = (e.clientX - rect.left) - rect.width / 2;
+      const y = (e.clientY - rect.top) - rect.height / 2;
+      
+      gsap.to(btn, { x: x * 0.4, y: y * 0.4, duration: 0.6, ease: "power3.out", overwrite: "auto" });
+      gsap.to(btnText, { x: x * 0.2, y: y * 0.2, duration: 0.6, ease: "power3.out", overwrite: "auto" });
+    });
+
+    btn.addEventListener('mouseleave', () => {
+      // Under-damped Spring Recoil
+      gsap.to(btn, { x: 0, y: 0, duration: 1, ease: "elastic.out(1, 0.3)", overwrite: "auto" });
+      gsap.to(btnText, { x: 0, y: 0, duration: 1, ease: "elastic.out(1, 0.3)", overwrite: "auto" });
+    });
+
+    // Content Generation Logic
+    const generateBtn = document.getElementById('generate-btn');
+    const loader = document.getElementById('loader');
+    const resultsContainer = document.getElementById('results');
+    
+    generateBtn.addEventListener('click', async () => {
+      const url = document.getElementById('yt-link').value;
+      if (!url) return alert("Please enter a YouTube link.");
+
+      // Hide results, show loader (Skill 502: The Wait Illusion)
+      resultsContainer.style.display = 'none';
+      loader.style.display = 'block';
+      gsap.set(".result-card", { opacity: 0, y: 20 });
+
+      try {
+          const response = await fetch('/api/generate', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ url: url })
+          });
+          
+          const data = await response.json();
+          
+          if (data.memory_error) {
+              alert(data.memory_error);
+              loader.style.display = 'none';
+              return;
+          }
+          
+          if (data.error) {
+              alert("Error: " + data.error);
+              loader.style.display = 'none';
+              return;
+          }
+
+          document.getElementById('res-titles').innerHTML = data.titles.replace(/\n/g, '<br>');
+          document.getElementById('res-desc').innerHTML = data.description.replace(/\n/g, '<br>');
+          document.getElementById('res-tags').innerHTML = data.hashtags;
+          document.getElementById('res-loc').innerHTML = data.location.replace(/\n/g, '<br>');
+          document.getElementById('res-prompt').innerHTML = data.thumbnail_prompt;
+          
+          loader.style.display = 'none';
+          resultsContainer.style.display = 'flex';
+          
+          // Staggered reveal of results
+          gsap.to(".result-card", {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            stagger: 0.1, // Stagger Mathematical
+            ease: "elite"
+          });
+          
+          renderGraph();
+      } catch (error) {
+          alert("Failed to connect to backend: " + error);
+          loader.style.display = 'none';
+      }
+    });
+
+    function renderGraph() {
+        const ctx = document.getElementById('scheduleChart').getContext('2d');
+        if(window.myChart) { window.myChart.destroy(); }
+        window.myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['9:00 AM', '12:00 PM', '3:00 PM', '6:00 PM (Prime)'],
+                datasets: [
+                    {
+                        label: 'Shorts (Max 3/day)',
+                        data: [1, 1, 1, 0],
+                        backgroundColor: 'rgba(94, 106, 210, 0.7)',
+                        borderColor: 'rgba(94, 106, 210, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Long Form (6-7 min) (Max 1/day)',
+                        data: [0, 0, 0, 1],
+                        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                        borderColor: 'rgba(255, 255, 255, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true, max: 2, ticks: { color: '#ccc' } },
+                    x: { ticks: { color: '#ccc' } }
+                },
+                plugins: {
+                    legend: { labels: { color: '#fff' } }
+                }
+            }
+        });
+    }
+  </script>
+</body>
+</html>

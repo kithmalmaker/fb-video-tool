@@ -92,9 +92,6 @@ async def generate_fb_content(req: VideoRequest):
     except Exception as e:
         return {"error": f"Failed to fetch YouTube data: {str(e)}"}
 
-    if not api_key:
-        return {"error": "Missing GOOGLE_FLOW_API_KEY in .env"}
-
     # 2. DYNAMIC CONTENT GENERATION VIA AI
     prompt = f"""
     Based on the following actual YouTube video context:

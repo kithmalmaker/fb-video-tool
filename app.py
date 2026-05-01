@@ -110,14 +110,15 @@ async def generate_fb_content(req: VideoRequest):
     }}
     """
     
-    endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key={api_key}"
+    current_api_key = os.getenv("GOOGLE_FLOW_API_KEY")
+    endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key={current_api_key}"
     headers = {"Content-Type": "application/json"}
     payload = {
         "contents": [{"parts": [{"text": prompt}]}]
     }
     
     try:
-        if api_key and api_key != "hpsk":
+        if current_api_key and current_api_key != "hpsk":
             async with aiohttp.ClientSession() as session:
                 async with session.post(endpoint, json=payload, headers=headers) as resp:
                     if resp.status == 200:
@@ -128,13 +129,15 @@ async def generate_fb_content(req: VideoRequest):
                         result = json.loads(text)
                         return result
                     else:
-                        raise Exception(f"AI Generation Failed: {await resp.text()}")
+                        raise Exception(f"AI API HTTP Error: {await resp.text()}")
         else:
-            raise Exception("Invalid or placeholder API key.")
+            raise Exception("Invalid or missing API key in Vercel Environment Variables.")
     except Exception as e:
         # FALLBACK: Dynamically generate content using the real scraped Title and Description
-        # This proves the tool works even if the user hasn't provided a valid Google API Key.
-        fallback_desc = f"""Did you know about this? 🚀 In today's cosmic exploration, we dive deep into: {title}
+        # Inject the error so the user knows exactly why AI failed.
+        fallback_desc = f"""⚠️ [AI ENGINE ERROR: {str(e)}] ⚠️
+
+Did you know about this? 🚀 In today's cosmic exploration, we dive deep into: {title}
 
 {description[:150]}...
 

@@ -52,18 +52,25 @@ async def generate_fb_content(req: VideoRequest):
         conn.close()
         return {"memory_error": f"MEMORY ALERT: You already generated content for this video: '{existing[0]}'. The FB Algorithm penalizes duplicate uploads. Please use a new video."}
     
-    # 1. ACTUAL YOUTUBE SCRAPING VIA YT-DLP
-    ydl_opts = {'quiet': True}
+    # 1. ACTUAL YOUTUBE SCRAPING VIA LIGHTWEIGHT REQUEST (Bypass Vercel yt-dlp block)
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=False)
-            title = info.get('title', 'Unknown Title')
-            description = info.get('description', '')
-            
-            # Save to Memory
-            c.execute("INSERT INTO processed_videos (url, title) VALUES (?, ?)", (url, title))
-            conn.commit()
-            conn.close()
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}) as resp:
+                html = await resp.text()
+                
+                # Extract title
+                import re
+                title_match = re.search(r'<title>(.*?)</title>', html)
+                title = title_match.group(1).replace(' - YouTube', '') if title_match else 'Unknown Title'
+                
+                # Extract description
+                desc_match = re.search(r'"shortDescription":"(.*?)"', html)
+                description = desc_match.group(1) if desc_match else ''
+                
+                # Save to Memory
+                c.execute("INSERT INTO processed_videos (url, title) VALUES (?, ?)", (url, title))
+                conn.commit()
+                conn.close()
     except Exception as e:
         conn.close()
         return {"error": f"Failed to fetch YouTube data: {str(e)}"}

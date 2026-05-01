@@ -20,14 +20,22 @@ load_dotenv(dotenv_path=env_path)
 api_key = os.getenv("GOOGLE_FLOW_API_KEY")
 
 # --- LIFETIME MEMORY INIT ---
-DB_PATH = "cosmic_memory.db"
+# Vercel serverless functions have a read-only filesystem except for /tmp
+if os.environ.get('VERCEL') or os.environ.get('VERCEL_ENV'):
+    DB_PATH = "/tmp/cosmic_memory.db"
+else:
+    DB_PATH = "cosmic_memory.db"
+
 def init_db():
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS processed_videos
-                 (id INTEGER PRIMARY KEY AUTOINCREMENT, url TEXT UNIQUE, title TEXT)''')
-    conn.commit()
-    conn.close()
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute('''CREATE TABLE IF NOT EXISTS processed_videos
+                     (id INTEGER PRIMARY KEY AUTOINCREMENT, url TEXT UNIQUE, title TEXT)''')
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"Warning: Could not initialize DB: {e}")
 
 init_db()
 
@@ -44,13 +52,17 @@ async def generate_fb_content(req: VideoRequest):
     url = req.url
     
     # Check Lifetime Memory Database
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute("SELECT title FROM processed_videos WHERE url = ?", (url,))
-    existing = c.fetchone()
-    if existing:
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute("SELECT title FROM processed_videos WHERE url = ?", (url,))
+        existing = c.fetchone()
+        if existing:
+            conn.close()
+            return {"memory_error": f"MEMORY ALERT: You already generated content for this video: '{existing[0]}'. The FB Algorithm penalizes duplicate uploads. Please use a new video."}
         conn.close()
-        return {"memory_error": f"MEMORY ALERT: You already generated content for this video: '{existing[0]}'. The FB Algorithm penalizes duplicate uploads. Please use a new video."}
+    except Exception as e:
+        print(f"Memory DB Read Error: {e}")
     
     # 1. ACTUAL YOUTUBE SCRAPING VIA LIGHTWEIGHT REQUEST (Bypass Vercel yt-dlp block)
     try:
@@ -68,11 +80,16 @@ async def generate_fb_content(req: VideoRequest):
                 description = desc_match.group(1) if desc_match else ''
                 
                 # Save to Memory
-                c.execute("INSERT INTO processed_videos (url, title) VALUES (?, ?)", (url, title))
-                conn.commit()
-                conn.close()
+                try:
+                    conn = sqlite3.connect(DB_PATH)
+                    c = conn.cursor()
+                    c.execute("INSERT INTO processed_videos (url, title) VALUES (?, ?)", (url, title))
+                    conn.commit()
+                    conn.close()
+                except Exception as db_e:
+                    print(f"Memory DB Write Error: {db_e}")
+                    
     except Exception as e:
-        conn.close()
         return {"error": f"Failed to fetch YouTube data: {str(e)}"}
 
     if not api_key:
